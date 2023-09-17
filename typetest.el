@@ -10,11 +10,12 @@
   "epoch time when test started")
 
 (defface typetest-error '((t ( :foreground "#cc6666"
-			    :underline ( :color "#cc6666"
+			    :underline ( :color foreground-color
 					 :style wave))))
   "on error")
 
-(defface typetest-correct '((t ( :foreground "#ffffff")))
+(defface typetest-correct '((t ( :foreground "#ffffff"
+				 :underline t)))
   "on success")
 
 (defun typetest--finish ()
