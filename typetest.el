@@ -9,6 +9,9 @@
 (defvar typetest--time 0
   "epoch time when test started")
 
+(defvar typetest--overlay nil
+  "overlay for typetest--buffer")
+
 (defface typetest-error '((t ( :foreground "#cc6666"
 			    :underline ( :color foreground-color
 					 :style wave))))
@@ -90,12 +93,14 @@
   (set-buffer typetest--buffer)
   (read-only-mode -1)
   (erase-buffer)
+  (when typetest--overlay
+    (delete-overlay typetest--overlay))
   (make-local-variable 'first-change-hook)
   (add-hook 'first-change-hook (lambda () (setq typetest--time (float-time))))
-  (defvar-local overlay (make-overlay 0 0 typetest--buffer nil t))
-  (overlay-put overlay 'after-string typetest--text)
-  (overlay-put overlay 'modification-hooks '(typetest--text-processing))
-  (overlay-put overlay 'insert-behind-hooks '(typetest--text-processing))
+  (set 'typetest--overlay (make-overlay 0 0 typetest--buffer nil t))
+  (overlay-put typetest--overlay 'after-string typetest--text)
+  (overlay-put typetest--overlay 'modification-hooks '(typetest--text-processing))
+  (overlay-put typetest--overlay 'insert-behind-hooks '(typetest--text-processing))
   (buffer-face-mode t)
   (buffer-face-set 'font-lock-comment-face)
   (switch-to-buffer typetest--buffer)
