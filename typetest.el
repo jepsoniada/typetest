@@ -12,6 +12,14 @@
 (defvar typetest--overlay nil
   "overlay for typetest--buffer")
 
+(defcustom typetest--finish-on-full-completeness t
+  "boolean to determine style of typetest finishing condition"
+  :type 'boolean)
+
+(defcustom typetest--language "english"
+  "choose quote language"
+  :type 'string)
+
 (defface typetest-error '((t ( :foreground "#cc6666"
 			    :underline ( :color foreground-color
 					 :style wave))))
@@ -45,7 +53,14 @@
 		  )
 		(string-diff (buffer-substring-no-properties (point-min) (point-max))
 			     typetest--text))
-	(unless (> (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max))))
+	(when (if typetest--finish-on-full-completeness
+		  (and (= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max))))
+		       (string-equal typetest--text (buffer-substring-no-properties (point-min) (point-max))))
+		(<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
+	
+	;; (when (if typetest--finish-on-full-completeness
+	;; 	  ()
+	;; 	  (<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
 	  (typetest--finish))
 	)
     (progn
@@ -106,3 +121,15 @@
   (switch-to-buffer typetest--buffer)
   (not-modified)
   )
+
+(defun typetest-quote ()
+  "gets random quote to open typetest buffer with it"
+  (interactive)
+  (require 'jq)
+  (require 'curl)
+  (curl "-o" "/tmp/a" (format "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/%s.json" typetest--language))
+  (with-temp-buffer
+    (insert (jq (format ".quotes[%d].text" (random (jq ".quotes | length" "/tmp/a"))) "/tmp/a"))
+    (typetest-buffer)))
+
+(provide 'typetest)
