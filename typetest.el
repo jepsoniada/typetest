@@ -1,5 +1,7 @@
 ;; (define-derived-mode result-mode special-mode "Result")
 
+(require 'dash)
+
 (defvar typetest--buffer nil
   "currently used buffer")
 
@@ -107,6 +109,7 @@
   (set 'typetest--text (buffer-substring-no-properties (point-min) (point-max)))
   (set-buffer typetest--buffer)
   (read-only-mode -1)
+  (visual-line-mode 1)
   (erase-buffer)
   (when typetest--overlay
     (delete-overlay typetest--overlay))
