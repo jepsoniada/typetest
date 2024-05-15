@@ -22,12 +22,17 @@
   "choose quote language"
   :type 'string)
 
+(defface typetest-text '((t ( :inherit font-lock-comment-face)))
+  "text to write")
+
 (defface typetest-error '((t ( :foreground "#cc6666"
-			    :underline ( :color foreground-color
-					 :style wave))))
+			       :underline ( :color foreground-color
+					    :style wave))))
   "on error")
 
-(defface typetest-correct '((t ( :foreground "#ffffff"
+;; BUG (?) - atribute ":inherit default" doesn't apply theme colors
+;; current implementation needs to restart at every change of theme to take effect
+(defface typetest-correct `((t ( :foreground ,(face-attribute 'default :foreground)
 				 :underline t)))
   "on success")
 
@@ -120,7 +125,7 @@
   (overlay-put typetest--overlay 'modification-hooks '(typetest--text-processing))
   (overlay-put typetest--overlay 'insert-behind-hooks '(typetest--text-processing))
   (buffer-face-mode t)
-  (buffer-face-set 'font-lock-comment-face)
+  (buffer-face-set 'typetest-text)
   (switch-to-buffer typetest--buffer)
   (not-modified)
   )
