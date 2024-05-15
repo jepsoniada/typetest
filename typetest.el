@@ -128,11 +128,21 @@
 (defun typetest-quote ()
   "gets random quote to open typetest buffer with it"
   (interactive)
-  (require 'jq)
-  (require 'curl)
-  (curl "-o" "/tmp/a" (format "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/%s.json" typetest--language))
-  (with-temp-buffer
-    (insert (jq (format ".quotes[%d].text" (random (jq ".quotes | length" "/tmp/a"))) "/tmp/a"))
-    (typetest-buffer)))
+  (let* ((buffer (url-retrieve-synchronously "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/english.json"))
+	 (http-string (with-current-buffer buffer
+			(buffer-string)))
+	 (http-body (substring http-string
+			       (+ 1
+				  (string-search "\n\n"
+						 http-string
+						 (string-search "\n\n"
+								http-string)))))
+	 (json (json-parse-string http-body)))
+    (with-temp-buffer
+      (insert (gethash "text"
+		       (elt (gethash "quotes" json)
+			    (random (length (gethash "quotes" json))))))
+      (typetest-buffer))))
+
 
 (provide 'typetest)
