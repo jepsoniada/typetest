@@ -22,6 +22,19 @@
   "choose quote language"
   :type 'string)
 
+(defcustom typetest-source-bindings
+  ((quotes-english . ((url . "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/english.json")
+		      (filename . "quotes-english.json")
+		      (root-getter . (lambda (json) (gethash "quotes" json)))
+		      (sample-getter . (lambda (json) (gethash "text" json))))))
+  "Alist of source name to source data bindings.
+The source data is alist of following shape:
+	url - url where json of samples is stored
+	filename - where to save downloaded json
+	root-getter - function to get the root of your samples
+	sample-getter - function to get list of samples
+")
+
 (defface typetest-text '((t ( :inherit font-lock-comment-face)))
   "text to write")
 
@@ -133,7 +146,9 @@
 (defun typetest-quote ()
   "gets random quote to open typetest buffer with it"
   (interactive)
-  (let* ((buffer (url-retrieve-synchronously "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/english.json"))
+  (let* ((buffer (url-retrieve-synchronously (alist-get 'url
+							(alist-get 'quotes-english
+								   typetest-source-bindings))))
 	 (http-string (with-current-buffer buffer
 			(buffer-string)))
 	 (http-body (substring http-string
@@ -143,11 +158,17 @@
 						 (string-search "\n\n"
 								http-string)))))
 	 (json (json-parse-string http-body)))
-    (with-temp-buffer
-      (insert (gethash "text"
-		       (elt (gethash "quotes" json)
-			    (random (length (gethash "quotes" json))))))
-      (typetest-buffer))))
+    (let ((root-getter (eval-expression (alist-get 'root-getter
+					(alist-get 'quotes-english
+						   typetest-source-bindings))))
+	  (sample-getter (eval-expression (alist-get 'sample-getter
+					  (alist-get 'quotes-english
+						     typetest-source-bindings)))))
+      (with-temp-buffer
+	(insert (funcall sample-getter
+			 (elt (funcall root-getter json)
+			      (random (length (funcall root-getter json))))))
+	(typetest-buffer)))))
 
 
 (provide 'typetest)
