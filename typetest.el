@@ -23,7 +23,7 @@
   :type 'string)
 
 (defcustom typetest-source-bindings
-  ((quotes-english . ((url . "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/english.json")
+  '((quotes-english . ((url . "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/english.json")
 		      (filename . "quotes-english.json")
 		      (root-getter . (lambda (json) (gethash "quotes" json)))
 		      (sample-getter . (lambda (json) (gethash "text" json))))))
@@ -48,6 +48,41 @@ The source data is alist of following shape:
 (defface typetest-correct `((t ( :foreground ,(face-attribute 'default :foreground)
 				 :underline t)))
   "on success")
+
+(defun typetest-fetch-sources (&rest sources)
+  (ignore-errors (make-directory (concat user-emacs-directory
+					 "typetest")))
+  (cl-loop for source in sources
+	   for source = (alist-get source
+				   typetest-source-bindings)
+	   when source
+	   for filename = (alist-get 'filename
+				     source)
+	   when source
+	   for body = (let* ((buffer (url-retrieve-synchronously (alist-get 'url
+									    source)))
+			     (http-string (with-current-buffer buffer
+					    (buffer-string)))
+			     (http-code (string-to-number (nth 1
+							       (string-split (substring http-string
+											0
+											(string-search "\n"
+												       http-string))))))
+			     (http-body (substring http-string
+						   (+ 1
+						      (string-search "\n\n"
+								     http-string
+								     (string-search "\n\n"
+										    http-string))))))
+			(when (= http-code 200)
+			  http-body))
+	   when (and body source)
+	   do (with-temp-buffer
+		     (insert body)
+		     (set-buffer-file-coding-system 'raw-text)
+		     (write-region nil nil (concat user-emacs-directory
+						   "typetest/"
+						   filename)))))
 
 (defun typetest--finish ()
   "thinks to run on test finish"
