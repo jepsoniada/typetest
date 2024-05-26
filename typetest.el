@@ -24,9 +24,9 @@
 
 (defcustom typetest-source-bindings
   '((quotes-english . ((url . "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/english.json")
-		      (filename . "quotes-english.json")
-		      (root-getter . (lambda (json) (gethash "quotes" json)))
-		      (sample-getter . (lambda (json) (gethash "text" json))))))
+		       (filename . "quotes-english.json")
+		       (root-getter . (lambda (json) (gethash "quotes" json)))
+		       (sample-getter . (lambda (json) (gethash "text" json))))))
   "Alist of source name to source data bindings.
 The source data is alist of following shape:
 	url - url where json of samples is stored
@@ -78,11 +78,11 @@ The source data is alist of following shape:
 			  http-body))
 	   when (and body source)
 	   do (with-temp-buffer
-		     (insert body)
-		     (set-buffer-file-coding-system 'raw-text)
-		     (write-region nil nil (concat user-emacs-directory
-						   "typetest/"
-						   filename)))))
+		(insert body)
+		(set-buffer-file-coding-system 'raw-text)
+		(write-region nil nil (concat user-emacs-directory
+					      "typetest/"
+					      filename)))))
 
 (defun typetest--finish ()
   "thinks to run on test finish"
@@ -112,10 +112,10 @@ The source data is alist of following shape:
 		  (and (= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max))))
 		       (string-equal typetest--text (buffer-substring-no-properties (point-min) (point-max))))
 		(<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
-	
-	;; (when (if typetest--finish-on-full-completeness
-	;; 	  ()
-	;; 	  (<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
+	  
+	  ;; (when (if typetest--finish-on-full-completeness
+	  ;; 	  ()
+	  ;; 	  (<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
 	  (typetest--finish))
 	)
     (progn
@@ -181,24 +181,21 @@ The source data is alist of following shape:
 (defun typetest-quote ()
   "gets random quote to open typetest buffer with it"
   (interactive)
-  (let* ((buffer (url-retrieve-synchronously (alist-get 'url
-							(alist-get 'quotes-english
-								   typetest-source-bindings))))
-	 (http-string (with-current-buffer buffer
+  (let* ((filename (alist-get 'filename
+			      (alist-get 'quotes-english
+					 typetest-source-bindings)))
+	 (json-string (with-temp-buffer
+			(insert-file-contents (concat user-emacs-directory
+						      "typetest/"
+						      filename))
 			(buffer-string)))
-	 (http-body (substring http-string
-			       (+ 1
-				  (string-search "\n\n"
-						 http-string
-						 (string-search "\n\n"
-								http-string)))))
-	 (json (json-parse-string http-body)))
+	 (json (json-parse-string json-string)))
     (let ((root-getter (eval-expression (alist-get 'root-getter
-					(alist-get 'quotes-english
-						   typetest-source-bindings))))
+						   (alist-get 'quotes-english
+							      typetest-source-bindings))))
 	  (sample-getter (eval-expression (alist-get 'sample-getter
-					  (alist-get 'quotes-english
-						     typetest-source-bindings)))))
+						     (alist-get 'quotes-english
+								typetest-source-bindings)))))
       (with-temp-buffer
 	(insert (funcall sample-getter
 			 (elt (funcall root-getter json)
