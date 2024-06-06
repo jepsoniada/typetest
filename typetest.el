@@ -14,11 +14,11 @@
 (defvar typetest--overlay nil
   "overlay for typetest--buffer")
 
-(defcustom typetest--finish-on-full-completeness t
+(defcustom typetest-finish-on-full-completeness t
   "boolean to determine style of typetest finishing condition"
   :type 'boolean)
 
-(defcustom typetest--language "english"
+(defcustom typetest-language "english"
   "choose quote language"
   :type 'string)
 
