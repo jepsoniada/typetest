@@ -108,7 +108,7 @@ The source data is alist of following shape:
 		  )
 		(string-diff (buffer-substring-no-properties (point-min) (point-max))
 			     typetest--text))
-	(when (if typetest--finish-on-full-completeness
+	(when (if typetest-finish-on-full-completeness
 		  (and (= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max))))
 		       (string-equal typetest--text (buffer-substring-no-properties (point-min) (point-max))))
 		(<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
