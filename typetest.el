@@ -101,27 +101,19 @@ The source data is alist of following shape:
       (progn
 	(overlay-put overlay 'after-string
 		     (condition-case nil
-			 (substring typetest--text (1- end))
+			 (substring typetest--text (1- (overlay-end overlay)))
 		       (args-out-of-range (lambda () ""))))
 	(mapcar (lambda (x)
-		  (set-text-properties (+ 1 (nth 0 x)) (+ 1 (nth 1 x)) '(face 'typetest-error))
-		  )
+		  (set-text-properties (+ 1 (nth 0 x)) (+ 1 (nth 1 x)) '(face 'typetest-error)))
 		(string-diff (buffer-substring-no-properties (point-min) (point-max))
 			     typetest--text))
 	(when (if typetest-finish-on-full-completeness
 		  (and (= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max))))
 		       (string-equal typetest--text (buffer-substring-no-properties (point-min) (point-max))))
 		(<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
-	  
-	  ;; (when (if typetest--finish-on-full-completeness
-	  ;; 	  ()
-	  ;; 	  (<= (length typetest--text) (length (buffer-substring-no-properties (point-min) (point-max)))))
-	  (typetest--finish))
-	)
+	  (typetest--finish)))
     (progn
-      (set-text-properties (point-min) (point-max) '(face 'typetest-correct))
-      ))
-  )
+      (set-text-properties (point-min) (point-max) '(face 'typetest-correct)))))
 
 (defun chunk-by (by list) "splits LIST into BY sized chunks"
        (mapcar (lambda (y) (mapcar (lambda (z) (nth z list)) y))
