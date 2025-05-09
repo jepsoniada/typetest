@@ -18,9 +18,10 @@
   "boolean to determine style of typetest finishing condition"
   :type 'boolean)
 
-(defcustom typetest-language "english"
-  "choose quote language"
-  :type 'string)
+(defcustom typetest-source 'quotes-english
+  "choose quote pool for `typetest-quote'
+it must be one of the entries from `typetest-source-bindings'"
+  :type 'symbol)
 
 (defcustom typetest-source-bindings
   '((quotes-english . ((url . "https://raw.githubusercontent.com/monkeytypegame/monkeytype/master/frontend/static/quotes/english.json")
@@ -174,7 +175,7 @@ The source data is alist of following shape:
   "gets random quote to open typetest buffer with it"
   (interactive)
   (let* ((filename (alist-get 'filename
-			      (alist-get 'quotes-english
+			      (alist-get typetest-source
 					 typetest-source-bindings)))
 	 (json-string (with-temp-buffer
 			(insert-file-contents (concat user-emacs-directory
@@ -183,10 +184,10 @@ The source data is alist of following shape:
 			(buffer-string)))
 	 (json (json-parse-string json-string)))
     (let ((root-getter (eval-expression (alist-get 'root-getter
-						   (alist-get 'quotes-english
+						   (alist-get typetest-source
 							      typetest-source-bindings))))
 	  (sample-getter (eval-expression (alist-get 'sample-getter
-						     (alist-get 'quotes-english
+						     (alist-get typetest-source
 								typetest-source-bindings)))))
       (with-temp-buffer
 	(insert (funcall sample-getter
