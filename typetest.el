@@ -174,26 +174,18 @@ The source data is alist of following shape:
 (defun typetest-quote ()
   "gets random quote to open typetest buffer with it"
   (interactive)
-  (let* ((filename (alist-get 'filename
-			      (alist-get typetest-source
-					 typetest-source-bindings)))
-	 (json-string (with-temp-buffer
-			(insert-file-contents (concat user-emacs-directory
-						      "typetest/"
-						      filename))
-			(buffer-string)))
-	 (json (json-parse-string json-string)))
-    (let ((root-getter (eval-expression (alist-get 'root-getter
-						   (alist-get typetest-source
-							      typetest-source-bindings))))
-	  (sample-getter (eval-expression (alist-get 'sample-getter
-						     (alist-get typetest-source
-								typetest-source-bindings)))))
+  (let-alist (alist-get typetest-source
+                        typetest-source-bindings)
+    (let ((json (with-temp-buffer
+                  (insert-file-contents (concat user-emacs-directory
+                                                "typetest/"
+                                                .filename))
+                  (json-parse-buffer)))
+          (root (funcall (eval-expression .root-getter) json)))
       (with-temp-buffer
-	(insert (funcall sample-getter
-			 (elt (funcall root-getter json)
-			      (random (length (funcall root-getter json))))))
-	(typetest-buffer)))))
+        (insert (funcall (eval-expression .sample-getter)
+                         (elt root
+                              (random (length root)))))))))
 
 
 (provide 'typetest)
