@@ -176,7 +176,7 @@ The source data is alist of following shape:
   (interactive)
   (let-alist (alist-get typetest-source
                         typetest-source-bindings)
-    (let ((json (with-temp-buffer
+    (let* ((json (with-temp-buffer
                   (insert-file-contents (concat user-emacs-directory
                                                 "typetest/"
                                                 .filename))
@@ -185,7 +185,7 @@ The source data is alist of following shape:
       (with-temp-buffer
         (insert (funcall (eval-expression .sample-getter)
                          (elt root
-                              (random (length root)))))))))
-
+                              (random (length root)))))
+        (typetest-buffer)))))
 
 (provide 'typetest)
